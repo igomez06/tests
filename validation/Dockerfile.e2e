@@ -16,16 +16,20 @@ COPY ["./qa-infra-automation", "$WORKSPACE2"]
 ARG TERRAFORM_VERSION=1.11.3
 ARG HELM_VERSION=3.15.2
 
+# Install core system dependencies, including ca-certificates, curl, wget, and docker first.
+# This ensures subsequent network operations use updated libraries and CA bundles.
+RUN zypper -n --gpg-auto-import-keys refresh && \
+    zypper -n install gcc binutils glibc-devel-static ca-certificates git-core wget curl unzip tar vim less file xz gzip sed gawk iproute2 iptables jq docker && \
+    rpm -e --nodeps --noscripts containerd # Assuming containerd is not strictly needed or managed differently
+
 # Install Helm
 RUN curl --verbose --show-error -L "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o helm.tar.gz && \
     tar -zxvf helm.tar.gz && \
     mv linux-amd64/helm /usr/local/bin/helm && \
     chmod +x /usr/local/bin/helm && \
     rm helm.tar.gz && \
-    rm -rf linux-amd64
-
-RUN zypper -n install gcc binutils glibc-devel-static ca-certificates git-core wget curl unzip tar vim less file xz gzip sed gawk iproute2 iptables jq
-RUN zypper install -y -f docker && rpm -e --nodeps --noscripts containerd
+    rm -rf linux-amd64 \
+    && echo "Helm v${HELM_VERSION} installed successfully."
 
 # Python related dependencies for the Integration/Validation tests.
 RUN zypper -n install python311-pip python311-base python311 python311-devel python311-tox libffi-devel libopenssl-devel
