@@ -14,6 +14,15 @@ COPY ["./tests", "$WORKSPACE"]
 COPY ["./qa-infra-automation", "$WORKSPACE2"]
 
 ARG TERRAFORM_VERSION=1.11.3
+ARG HELM_VERSION=3.15.2
+
+# Install Helm
+RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o helm.tar.gz && \
+    tar -zxvf helm.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin/helm && \
+    chmod +x /usr/local/bin/helm && \
+    rm helm.tar.gz && \
+    rm -rf linux-amd64
 
 RUN zypper -n install gcc binutils glibc-devel-static ca-certificates git-core wget curl unzip tar vim less file xz gzip sed gawk iproute2 iptables jq
 RUN zypper install -y -f docker && rpm -e --nodeps --noscripts containerd
@@ -52,12 +61,6 @@ RUN wget "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terrafor
 RUN curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && \
     chmod +x kubectl && \
     mv ./kubectl /usr/local/bin/kubectl
-
-# Install Helm
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
-    chmod +x get_helm.sh && \
-    sh -x ./get_helm.sh && \
-    rm get_helm.sh
 
 # necessary to run if statements using [[ ]]
 SHELL ["/bin/bash", "-c"] 
