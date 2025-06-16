@@ -23,13 +23,11 @@ RUN zypper -n --gpg-auto-import-keys refresh && \
     rpm -e --nodeps --noscripts containerd # Assuming containerd is not strictly needed or managed differently
 
 # Install Helm
-RUN curl --verbose --show-error -L "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o helm.tar.gz && \
-    tar -zxvf helm.tar.gz && \
-    mv linux-amd64/helm /usr/local/bin/helm && \
-    chmod +x /usr/local/bin/helm && \
-    rm helm.tar.gz && \
-    rm -rf linux-amd64 \
-    && echo "Helm v${HELM_VERSION} installed successfully."
+RUN wget -v https://get.helm.sh/helm-v3.3.4-linux-amd64.tar.gz && \
+    tar -x -f helm-v3.3.4-linux-amd64.tar.gz && \
+    mv linux-amd64/helm /bin/helm_v3 && \
+    chmod +x /bin/helm_v3 && \
+    rm helm-v3.3.4-linux-amd64.tar.gz
 
 # Python related dependencies for the Integration/Validation tests.
 RUN zypper -n install python311-pip python311-base python311 python311-devel python311-tox libffi-devel libopenssl-devel
